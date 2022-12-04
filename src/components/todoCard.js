@@ -3,6 +3,7 @@ import { AiFillDelete } from "react-icons/ai";
 import { MdModeEdit } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import moment from "moment";
+import { deleteTodo } from "../features/todos/todoSlice";
 
 
 // passing default value to props
@@ -11,9 +12,13 @@ const Todocard = ({ todo = {} }) => {
 
   // converting date to required format
   const convertDate = (date) => {
-    return moment(date).format('L'); // December 2, 2022 1:25 PM
+    return moment(date).format('L'); // 12/02/2022
   }
- 
+
+  const handleDeleteTodo = () =>{
+    dispatch(deleteTodo(todo?._id))
+  }
+  
   return (
   <>
     <div className=" bg-gray-700 px-2 py-1 rounded-md flex justify-between items-center ">
@@ -23,8 +28,8 @@ const Todocard = ({ todo = {} }) => {
       
      </div>
      <div className="flex items-center gap-x-2">
-        <MdModeEdit size={25} className="text-white" />
-        <AiFillDelete size={25} className="text-white" />
+        <MdModeEdit size={25} className="text-white cursor-pointer" />
+        <AiFillDelete onClick={handleDeleteTodo} size={25} className="text-white cursor-pointer" />
       </div>
       
     </div>

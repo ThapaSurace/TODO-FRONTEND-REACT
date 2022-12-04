@@ -9,7 +9,7 @@ const initialState = {
   message: "",
 };
 
-// get list of todos
+// getting list of todos
 export const getTodos = createAsyncThunk(
   "todos/getTodos",
   async (_, thunkAPI) => {
@@ -28,13 +28,16 @@ export const getTodos = createAsyncThunk(
   }
 );
 
-// create todos
+// adding todos
 export const addTodos = createAsyncThunk(
   "todos/addTodos",
   async (todo, thunkAPI) => {
     try {
-      // we can get user token using thunkApi from userSlic
-      return await todoServices.addTodos(todo,thunkAPI.getState().user.user.token);
+      // we can get user token using thunkApi from userSlice
+      return await todoServices.addTodos(
+        todo,
+        thunkAPI.getState().user.user.token
+      );
     } catch (error) {
       const message =
         (error.response &&
@@ -47,6 +50,26 @@ export const addTodos = createAsyncThunk(
   }
 );
 
+// deleting todos
+export const deleteTodo = createAsyncThunk(
+  "todos/deleteTodo",
+  async (id, thunkAPI) => {
+    try {
+      return await todoServices.deleteTodo(
+        id,
+        thunkAPI.getState().user.user.token
+      );
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 export const todoSlice = createSlice({
   name: "todos",
@@ -82,6 +105,21 @@ export const todoSlice = createSlice({
         state.isError = true;
         state.message = action.payload; // to get error message from backend response
       })
+      .addCase(deleteTodo.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteTodo.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.todo = state.todo.filter(
+          (item) => item._id !== action.payload.id
+        );
+      })
+      .addCase(deleteTodo.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload; // to get error message from backend response
+      });
   },
 });
 export const { reset } = todoSlice.actions;
