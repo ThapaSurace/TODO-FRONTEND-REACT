@@ -2,31 +2,51 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { DiYeoman } from "react-icons/di";
-import { addTodos, getTodos, reset } from "../features/todos/todoSlice";
+import {
+  addTodos,
+  getTodos,
+  reset,
+  updateTodo,
+} from "../features/todos/todoSlice";
 import Todocard from "./todoCard";
 
 const Dashboard = () => {
-  const [todoText, setTodoText] = useState("");
-
   const { user } = useSelector((state) => state.user);
-  const { todo } = useSelector((state) => state.todo);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [todoText, setTodoText] = useState("");
+  const [updateTodoId, setUpdateTodoId] = useState("");
+  const { todo } = useSelector((state) => state.todo);
+  
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
     dispatch(getTodos());
-
     return () => {
       dispatch(reset());
     };
   }, [user, navigate, dispatch]);
 
+  const handleTodochange = (e) => {
+    setTodoText(e.target.value);
+  };
+  
+  // adding and updating todo
   const onSubmit = (e) => {
     e.preventDefault();
-    dispatch(addTodos(todoText));
-    setTodoText("");
+    if (updateTodoId !== "" && todoText) {
+      const updateData = {
+        updateTodoId,
+        todoText,
+      };
+      dispatch(updateTodo(updateData));
+      setTodoText("");
+      setUpdateTodoId("");
+    } else {
+      dispatch(addTodos(todoText));
+      setTodoText("");
+    }
   };
 
   return (
@@ -44,13 +64,18 @@ const Dashboard = () => {
               name="todo"
               value={todoText}
               placeholder="Add todo..."
-              onChange={(e) => setTodoText(e.target.value)}
+              onChange={handleTodochange}
             />
           </form>
         </div>
         <div className="flex flex-col gap-2">
           {todo?.map((item) => (
-            <Todocard todo={item} key={item._id} />
+            <Todocard
+              todo={item}
+              key={item?._id}
+              setTodoText={setTodoText}
+              setUpdateTodoId={setUpdateTodoId}
+            />
           ))}
         </div>
       </div>
